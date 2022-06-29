@@ -1,23 +1,69 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 function App() {
+  let page = 1;
+  const [canLoadMore, setCanLoadMore] = useState(true);
+  const [equity, setEquity] = useState([]);
+
+  const loadMoreData = () => {
+    axios
+      .get(`http://127.0.0.1:8000/api/equity?page=${page}`)
+      .then(({ data }) => {
+        const newData = data.results;
+        setEquity((oldEquity) => [...oldEquity, ...newData]);
+        console.log(equity);
+        if(data.next == null){
+          setCanLoadMore(false)
+        }
+      });
+    page += 1;
+  };
+
+  const handleScroll = (e) => {
+    if (
+      window.innerHeight + e.target.documentElement.scrollTop + 1 >=
+      e.target.documentElement.scrollHeight
+    ) {
+      console.log("bottom of page");
+      if(canLoadMore){
+        loadMoreData();
+      }
+      
+    }
+  };
+
+  useEffect(() => {
+    loadMoreData();
+    window.addEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+
+    <div>
+
+      <h1>Scraped Data</h1>
+      <table>
+        <thead>
+          <tr>
+            <th>Market Watch</th>
+            <th>Balance</th>
+            <th>Equity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {equity.map((e) => {
+            return (
+              <tr key={e.id}>
+                <td>{e.market_watch}</td>
+                <td>{e.balance}</td>
+                <td>{e.equity}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
