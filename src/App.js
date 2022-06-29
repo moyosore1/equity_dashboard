@@ -16,9 +16,11 @@ function App() {
         console.log(equity);
         if(data.next == null){
           setCanLoadMore(false)
+        }else{
+          page += 1;
         }
       });
-    page += 1;
+    
   };
 
   const handleScroll = (e) => {
@@ -26,7 +28,7 @@ function App() {
       window.innerHeight + e.target.documentElement.scrollTop + 1 >=
       e.target.documentElement.scrollHeight
     ) {
-      console.log("bottom of page");
+      
       if(canLoadMore){
         loadMoreData();
       }
@@ -53,9 +55,9 @@ function App() {
           </tr>
         </thead>
         <tbody>
-          {equity.map((e) => {
+          {equity.map((e, i) => {
             return (
-              <tr key={e.id}>
+              <tr key={i}>
                 <td>{e.market_watch}</td>
                 <td>{e.balance}</td>
                 <td>{e.equity}</td>
