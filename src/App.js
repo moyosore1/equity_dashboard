@@ -4,48 +4,48 @@ import axios from "axios";
 
 function App() {
   let page = 1;
-  const [canLoadMore, setCanLoadMore] = useState(true);
+  let canLoadMore = true;
   const [equity, setEquity] = useState([]);
 
   const loadMoreData = () => {
+    let newData = [];
     axios
-      .get(`http://127.0.0.1:8000/api/equity?page=${page}`)
+      .get(`https://moyoequitybot.herokuapp.com/api/equity?page=${page}`)
       .then(({ data }) => {
-        const newData = data.results;
-        setEquity((oldEquity) => [...oldEquity, ...newData]);
-        console.log(equity);
-        if(data.next == null){
-          setCanLoadMore(false)
-        }else{
+        newData = [...data.results];
+        setEquity((equity) => [...equity, ...newData]);
+        if (!data.next) {
+          canLoadMore = false;
+        } else {
           page += 1;
         }
       });
-    
   };
 
   const handleScroll = (e) => {
-    if (
-      window.innerHeight + e.target.documentElement.scrollTop + 1 >=
-      e.target.documentElement.scrollHeight
-    ) {
-      
-      if(canLoadMore){
-        loadMoreData();
-      }
-      
+    const scrollHeight = e.target.documentElement.scrollHeight;
+    const currentHeight = Math.ceil(
+      e.target.documentElement.scrollTop + window.innerHeight
+    );
+    if (currentHeight + 1 >= scrollHeight && canLoadMore == true) {
+      loadMoreData();
     }
   };
 
   useEffect(() => {
     loadMoreData();
     window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
   }, []);
 
   return (
-
     <div>
-
-      <h1>Scraped Data</h1>
+      <h1>
+        Scraped Data
+      </h1>
       <table>
         <thead>
           <tr>
